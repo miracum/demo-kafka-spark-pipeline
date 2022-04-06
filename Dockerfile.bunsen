@@ -1,0 +1,41 @@
+FROM jupyter/minimal-notebook:latest
+
+# https://engineering.cerner.com/bunsen/0.5.10-SNAPSHOT/introduction.html
+# https://repo.maven.apache.org/maven2/com/cerner/bunsen/bunsen-assembly/0.5.11/
+ENV BUNSEN_VERSION=0.5.11
+ENV BUNSEN_ASSEMBLY=https://repo.maven.apache.org/maven2/com/cerner/bunsen/bunsen-assembly/${BUNSEN_VERSION}/bunsen-assembly-${BUNSEN_VERSION}-dist.zip 
+
+USER root
+
+RUN wget $BUNSEN_ASSEMBLY -O /opt/bunsen-assembly-${BUNSEN_VERSION}-dist.zip
+
+RUN cd /opt && unzip bunsen-assembly-${BUNSEN_VERSION}-dist.zip -d . && \
+    cp -r bunsen-assembly-${BUNSEN_VERSION} /usr/local/bunsen-assembly-${BUNSEN_VERSION}
+
+RUN ln -s /usr/local/bunsen-assembly-${BUNSEN_VERSION} /usr/local/bunsen
+
+ENV PYTHONPATH=$PYTHONPATH:/usr/local/bunsen/python
+
+# install java
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    default-jre
+
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/
+ENV PATH=$PATH:$JAVA_HOME/bin
+
+# must match with spark-version from spark-container
+ENV SPARK_VERSION=3.2.1
+# must match witch major-minor version of scala
+# (find out in spark container running command 'spark-shell')
+ENV SPARK_SCALA_VERSION=2.12
+
+# define submit-args (this is working now 15.3.2022 lorenz)
+ENV PYSPARK_SUBMIT_ARGS=" \
+    --jars /usr/local/bunsen/jars/bunsen-spark-shaded-$BUNSEN_VERSION.jar \
+    --packages org.apache.spark:spark-sql-kafka-0-10_$SPARK_SCALA_VERSION:$SPARK_VERSION \
+    pyspark-shell"
+
+# python-version from spark must match version form jupyter / client (python 3.8)
+# create conda env with python 3.8
+RUN conda install python=3.8 
+RUN pip install pyspark==${SPARK_VERSION} pandas
