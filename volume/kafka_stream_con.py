@@ -43,7 +43,9 @@ if __name__ == "__main__":
     df
 
     mydf_rdd = mydf.rdd
-    type(mydf_rdd) # convert to javaRDD for bunsen
+    type(mydf_rdd) # convert to javaRDD for bunsen?
 
-    # the bunsen part is failing due to using old pyspark=2.4.4
-    #bundles = from_json(mydf_rdd, 'value')
+    # the bunsen r4 part is failing (probably due to using old pyspark=2.4.4)
+    bundles = from_json(mydf_rdd, 'value')
+    conditions = extract_entry(spark, from_json(mydf, 'value'), 'Condition')
+ 
