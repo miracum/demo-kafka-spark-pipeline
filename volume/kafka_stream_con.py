@@ -5,8 +5,9 @@ master = "spark://spark:7077"
 kafka_topic = "fhir.post-gateway-kdb"
 
 # https://engineering.cerner.com/bunsen/0.5.10-SNAPSHOT/
-from bunsen.r4.bundles import from_json, extract_entry
 from pyspark.sql import SparkSession
+from pathling.etc import find_jar
+from pathling.r4 import bundles
 
 if __name__ == "__main__":
 
@@ -14,6 +15,7 @@ if __name__ == "__main__":
         .builder \
         .appName(appName) \
         .master(master) \
+        .config('spark.jars', find_jar()) \
         .getOrCreate()
 
     df = spark \
@@ -35,17 +37,15 @@ if __name__ == "__main__":
     # close connection after 15 seconds
     query.awaitTermination(15)
 
-    mydf = spark.sql("select * from gettable")
-    mydf.show()
-    type(mydf)
+    kafka_data = spark.sql("select * from gettable")
+    kafka_data.show()
+    type(kafka_data)
 
-    df = mydf.toPandas()
-    df
+    resources = bundles.from_json(kafka_data, 'value')
+    patients = bundles.extract_entry(spark, resources, 'Patient')
+    encounter = bundles.extract_entry(spark, resources, 'Encounter')
+    condition = bundles.extract_entry(spark, resources, 'Condition')
 
-    mydf_rdd = mydf.rdd
-    type(mydf_rdd) # convert to javaRDD for bunsen?
-
-    # the bunsen r4 part is failing (probably due to using old pyspark=2.4.4)
-    bundles = from_json(mydf_rdd, 'value')
-    conditions = extract_entry(spark, from_json(mydf, 'value'), 'Condition')
- 
+    patients.toPandas()
+    encounter.toPandas()
+    condition.toPandas()

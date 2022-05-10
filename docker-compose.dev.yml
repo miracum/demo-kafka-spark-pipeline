@@ -59,7 +59,7 @@ services:
   # https://github.com/bitnami/bitnami-docker-spark
   spark:
     container_name: spark
-    image: docker.io/bitnami/spark:3
+    image: docker.io/bitnami/spark:3.2.1
     environment:
       - SPARK_MODE=master
       - SPARK_RPC_AUTHENTICATION_ENABLED=no
@@ -70,7 +70,7 @@ services:
       - '8083:8080'
   spark-worker:
     container_name: spark-worker
-    image: docker.io/bitnami/spark:3
+    image: docker.io/bitnami/spark:3.2.1
     environment:
       - SPARK_MODE=worker
       - SPARK_MASTER_URL=spark://spark:7077
@@ -81,11 +81,9 @@ services:
       - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
       - SPARK_SSL_ENABLED=no
 
-  bunsen:
-    container_name: bunsen
-    build:
-      context: ./
-      dockerfile: Dockerfile.bunsen 
+  jupyter-pathling:
+    container_name: jupyter-pathling
+    image: jupyter-pathling
     ports: 
       - 4040:4040
       - 8888:8888
