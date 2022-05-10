@@ -34,7 +34,8 @@ RUN pip install pyspark==${SPARK_VERSION} pandas
 
 # install pathling api
 # https://github.com/aehrc/pathling/tree/issue/452/lib/python#development-setup
-RUN git clone -b issue/452 https://github.com/aehrc/pathling.git
+#RUN git clone -b issue/452 https://github.com/aehrc/pathling.git
+RUN git clone -b issue/452 https://github.com/kapsner/pathling.git
 RUN cd pathling && \
     mvn -q clean install -pl lib/python -am
 
