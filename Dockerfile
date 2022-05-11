@@ -44,4 +44,4 @@ ENV PYSPARK_SUBMIT_ARGS=" \
     --packages org.apache.spark:spark-sql-kafka-0-10_$SPARK_SCALA_VERSION:$SPARK_VERSION \
     pyspark-shell"
 
-USER $USER
+USER jovyan

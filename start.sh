@@ -4,7 +4,7 @@
 docker build -f Dockerfile -t jupyter-pathling .
 docker-compose -f docker-compose.dev.yml up -d
 
-printf "waiting 30 seconds for mock-data-loader to finish"
+printf "waiting 30 seconds for mock-data-loader to finish\n\n"
 sleep 30
 
 # check logs of bunsen container for getting URL
