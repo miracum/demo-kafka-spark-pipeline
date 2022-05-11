@@ -1,0 +1,12 @@
+/*
+/*/*
+
+!.gitignore
+!/volume
+!/test-data
+!/test-data/mock-data-kdb.ndjson
+
+!*.sh
+!*.md
+!*.yml
+!Dockerfile

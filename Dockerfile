@@ -15,7 +15,7 @@ RUN wget https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache
     ln -s /opt/apache-maven-${MAVEN_VERSION} /opt/maven
 
 # define env vars
-ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 ENV PATH=$JAVA_HOME/bin:$PATH
 ENV M2_HOME=/opt/maven
 ENV MAVEN_HOME=${M2_HOME}
@@ -43,3 +43,5 @@ RUN cd pathling && \
 ENV PYSPARK_SUBMIT_ARGS=" \
     --packages org.apache.spark:spark-sql-kafka-0-10_$SPARK_SCALA_VERSION:$SPARK_VERSION \
     pyspark-shell"
+
+USER $USER

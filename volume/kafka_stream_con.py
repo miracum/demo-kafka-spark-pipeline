@@ -6,6 +6,7 @@ kafka_topic = "fhir.post-gateway-kdb"
 
 # https://engineering.cerner.com/bunsen/0.5.10-SNAPSHOT/
 import pyspark
+import pathling
 from pyspark.sql import SparkSession
 from pathling.etc import find_jar
 from pathling.r4 import bundles
@@ -62,3 +63,4 @@ if __name__ == "__main__":
     print("Maven version: {}\n\n".format(os.system("mvn --version")))
     print("Java version: {}\n\n".format(os.system("java --version")))
     print("Pyspark version: {}\n\n".format(pyspark.__version__))
+    print("Pathling version: {}\n\n".format(pathling.__version__))
