@@ -1,7 +1,6 @@
 #!/bin/python
 
 appName = "Kafka, Spark and FHIR Data"
-master = "spark://spark:7077"
 kafka_topic = "fhir.post-gateway-kdb"
 
 import pyspark

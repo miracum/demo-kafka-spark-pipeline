@@ -1,6 +1,7 @@
 FROM jupyter/pyspark-notebook:latest
 
-RUN /opt/conda/bin/pip install pathling==5.0.3.dev0
+RUN /opt/conda/bin/pip install pathling==5.0.3.dev0 \
+    findspark
 
 ENV PYSPARK_SUBMIT_ARGS=" \
     --packages org.apache.spark:spark-sql-kafka-0-10_2.12:$APACHE_SPARK_VERSION,au.csiro.pathling:encoders:5.0.3-SNAPSHOT \
