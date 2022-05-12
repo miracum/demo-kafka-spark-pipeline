@@ -2,6 +2,8 @@
 
 appName = "Kafka, Spark and FHIR Data"
 kafka_topic = "fhir.post-gateway-kdb"
+master1 = "local[*]"
+master2 = "spark://spark-master:7077"
 
 import pyspark
 from pyspark.sql import SparkSession
@@ -9,50 +11,52 @@ from pathling.r4 import bundles
 
 if __name__ == "__main__":
 
-    try:
-        spark = SparkSession \
-            .builder \
-            .appName(appName) \
-            .master("local[*]") \
-            .getOrCreate()
+    for master in [master1, master2]:
 
-        print("\n\n########################################################")
-        print("\nSystem Info\n")
-        print("########################################################\n\n")
-        print("Java version: {}\n\n".format(spark._jvm.java.lang.Runtime.version().toString()))
-        print("Pyspark version: {}\n\n".format(pyspark.__version__))
+        try:
+            spark = SparkSession \
+                .builder \
+                .appName(appName) \
+                .master(master) \
+                .getOrCreate()
 
-        df = spark \
-            .readStream  \
-            .format("kafka") \
-            .option("kafka.bootstrap.servers", "kafka1:19092") \
-            .option("subscribe", kafka_topic) \
-            .option("startingOffsets", "earliest") \
-            .load()
+            print("\n\n########################################################")
+            print("\nSystem Info\n")
+            print("########################################################\n\n")
+            print("Java version: {}\n\n".format(spark._jvm.java.lang.Runtime.version().toString()))
+            print("Pyspark version: {}\n\n".format(pyspark.__version__))
 
-        df.printSchema()
+            df = spark \
+                .readStream  \
+                .format("kafka") \
+                .option("kafka.bootstrap.servers", "kafka1:19092") \
+                .option("subscribe", kafka_topic) \
+                .option("startingOffsets", "earliest") \
+                .load()
 
-        query = df.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)") \
-                .writeStream \
-                .queryName("gettable")\
-                .format("memory")\
-                .start()
+            df.printSchema()
 
-        # close connection after 30 seconds
-        query.awaitTermination(30)
+            query = df.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)") \
+                    .writeStream \
+                    .queryName("gettable")\
+                    .format("memory")\
+                    .start()
 
-        kafka_data = spark.sql("select * from gettable")
-        kafka_data.show()
-        type(kafka_data)
+            # close connection after 30 seconds
+            query.awaitTermination(30)
 
-        resources = bundles.from_json(kafka_data, 'value')
-        patients = bundles.extract_entry(spark, resources, 'Patient')
-        encounter = bundles.extract_entry(spark, resources, 'Encounter')
-        condition = bundles.extract_entry(spark, resources, 'Condition')
+            kafka_data = spark.sql("select * from gettable")
+            kafka_data.show()
+            type(kafka_data)
 
-        patients.show()
-        encounter.show()
-        condition.show()
-        
-    except Exception as e:
-        print(e)
+            resources = bundles.from_json(kafka_data, 'value')
+            patients = bundles.extract_entry(spark, resources, 'Patient')
+            encounter = bundles.extract_entry(spark, resources, 'Encounter')
+            condition = bundles.extract_entry(spark, resources, 'Condition')
+
+            patients.show()
+            encounter.show()
+            condition.show()
+            
+        except Exception as e:
+            print(e)
