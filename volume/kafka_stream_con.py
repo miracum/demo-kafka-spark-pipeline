@@ -4,48 +4,56 @@ appName = "Kafka, Spark and FHIR Data"
 master = "spark://spark:7077"
 kafka_topic = "fhir.post-gateway-kdb"
 
-# https://engineering.cerner.com/bunsen/0.5.10-SNAPSHOT/
-from bunsen.r4.bundles import from_json, extract_entry
+import pyspark
 from pyspark.sql import SparkSession
+from pathling.r4 import bundles
 
 if __name__ == "__main__":
 
-    spark = SparkSession \
-        .builder \
-        .appName(appName) \
-        .master(master) \
-        .getOrCreate()
+    try:
+        spark = SparkSession \
+            .builder \
+            .appName(appName) \
+            .master("local[*]") \
+            .getOrCreate()
 
-    df = spark \
-        .readStream  \
-        .format("kafka") \
-        .option("kafka.bootstrap.servers", "kafka1:19092") \
-        .option("subscribe", kafka_topic) \
-        .option("startingOffsets", "earliest") \
-        .load()
+        print("\n\n########################################################")
+        print("\nSystem Info\n")
+        print("########################################################\n\n")
+        print("Java version: {}\n\n".format(spark._jvm.java.lang.Runtime.version().toString()))
+        print("Pyspark version: {}\n\n".format(pyspark.__version__))
 
-    df.printSchema()
+        df = spark \
+            .readStream  \
+            .format("kafka") \
+            .option("kafka.bootstrap.servers", "kafka1:19092") \
+            .option("subscribe", kafka_topic) \
+            .option("startingOffsets", "earliest") \
+            .load()
 
-    query = df.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)") \
-            .writeStream \
-            .queryName("gettable")\
-            .format("memory")\
-            .start()
+        df.printSchema()
 
-    # close connection after 15 seconds
-    query.awaitTermination(15)
+        query = df.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)") \
+                .writeStream \
+                .queryName("gettable")\
+                .format("memory")\
+                .start()
 
-    mydf = spark.sql("select * from gettable")
-    mydf.show()
-    type(mydf)
+        # close connection after 30 seconds
+        query.awaitTermination(30)
 
-    df = mydf.toPandas()
-    df
+        kafka_data = spark.sql("select * from gettable")
+        kafka_data.show()
+        type(kafka_data)
 
-    mydf_rdd = mydf.rdd
-    type(mydf_rdd) # convert to javaRDD for bunsen?
+        resources = bundles.from_json(kafka_data, 'value')
+        patients = bundles.extract_entry(spark, resources, 'Patient')
+        encounter = bundles.extract_entry(spark, resources, 'Encounter')
+        condition = bundles.extract_entry(spark, resources, 'Condition')
 
-    # the bunsen r4 part is failing (probably due to using old pyspark=2.4.4)
-    bundles = from_json(mydf_rdd, 'value')
-    conditions = extract_entry(spark, from_json(mydf, 'value'), 'Condition')
- 
+        patients.show()
+        encounter.show()
+        condition.show()
+        
+    except Exception as e:
+        print(e)
