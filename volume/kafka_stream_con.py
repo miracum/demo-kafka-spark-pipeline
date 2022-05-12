@@ -39,8 +39,8 @@ if __name__ == "__main__":
                 .format("memory")\
                 .start()
 
-        # close connection after 15 seconds
-        query.awaitTermination(150)
+        # close connection after 30 seconds
+        query.awaitTermination(30)
 
         kafka_data = spark.sql("select * from gettable")
         kafka_data.show()
@@ -54,5 +54,6 @@ if __name__ == "__main__":
         patients.show()
         encounter.show()
         condition.show()
+        
     except Exception as e:
         print(e)
