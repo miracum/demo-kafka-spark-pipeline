@@ -68,6 +68,7 @@ services:
       - SPARK_SSL_ENABLED=no
     ports:
       - '8083:8080'
+      
   spark-worker:
     container_name: spark-worker
     image: docker.io/bitnami/spark:3.2.1
