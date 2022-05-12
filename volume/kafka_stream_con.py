@@ -13,6 +13,12 @@ if __name__ == "__main__":
 
     for master in [master1, master2]:
 
+        print("\n\n########################################################")
+        print("########################################################")
+        print("\nRunning on Spark master: {}\n".format(master))
+        print("########################################################")
+        print("########################################################\n\n")   
+
         try:
             spark = SparkSession \
                 .builder \
@@ -25,6 +31,9 @@ if __name__ == "__main__":
             print("########################################################\n\n")
             print("Java version: {}\n\n".format(spark._jvm.java.lang.Runtime.version().toString()))
             print("Pyspark version: {}\n\n".format(pyspark.__version__))
+            print(spark.sparkContext.getConf().getAll())
+            print("########################################################\n\n")   
+
 
             df = spark \
                 .readStream  \
@@ -60,3 +69,6 @@ if __name__ == "__main__":
             
         except Exception as e:
             print(e)
+        
+        # finally stop spark session
+        spark.stop()
