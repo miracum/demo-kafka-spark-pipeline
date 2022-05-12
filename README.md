@@ -13,13 +13,15 @@ This is a dockerized demo setup containing:
 
 ## Start Container
 
-In order to start the containers with kafka and mock-data-loader + bunsen container with tutorial + jupyter lab run the following command:
+In order to start the containers with kafka and mock-data-loader + pathling container including jupyter lab, run the following command:
 
 ```bash
 # if not executable, first run "chmod +x start.sh"
 ./start.sh
 ```
+
 This script runs the kafka_stream_con.py script inside the container:
+
 - starts the SparkSession
 - reads the Kafka topic into Spark - prints out a key-value table with the R4 FHIR resources inside.
 
