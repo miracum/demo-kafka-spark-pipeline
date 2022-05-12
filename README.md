@@ -29,3 +29,11 @@ This script runs the kafka_stream_con.py script inside the container:
 # if not executable, first run "chmod +x stop.sh"
 ./stop.sh
 ```
+
+## Use JupyterLab 
+
+In order to use the jupyter lab, just run the following command and click on the URL to open Jupyter in a browser:
+
+```bash
+docker logs -f jupyter-pathling
+```
