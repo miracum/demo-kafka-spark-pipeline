@@ -4,13 +4,9 @@ appName = "Kafka, Spark and FHIR Data"
 master = "spark://spark:7077"
 kafka_topic = "fhir.post-gateway-kdb"
 
-# https://engineering.cerner.com/bunsen/0.5.10-SNAPSHOT/
 import pyspark
-import pathling
 from pyspark.sql import SparkSession
-from pathling.etc import find_jar
 from pathling.r4 import bundles
-import os
 
 if __name__ == "__main__":
 
@@ -18,9 +14,14 @@ if __name__ == "__main__":
         spark = SparkSession \
             .builder \
             .appName(appName) \
-            .master(master) \
-            .config('spark.jars', find_jar()) \
+            .master("local[*]") \
             .getOrCreate()
+
+        print("\n\n########################################################")
+        print("\nSystem Info\n")
+        print("########################################################\n\n")
+        print("Java version: {}\n\n".format(spark._jvm.java.lang.Runtime.version().toString()))
+        print("Pyspark version: {}\n\n".format(pyspark.__version__))
 
         df = spark \
             .readStream  \
@@ -39,7 +40,7 @@ if __name__ == "__main__":
                 .start()
 
         # close connection after 15 seconds
-        query.awaitTermination(15)
+        query.awaitTermination(150)
 
         kafka_data = spark.sql("select * from gettable")
         kafka_data.show()
@@ -50,17 +51,8 @@ if __name__ == "__main__":
         encounter = bundles.extract_entry(spark, resources, 'Encounter')
         condition = bundles.extract_entry(spark, resources, 'Condition')
 
-        patients.toPandas()
-        encounter.toPandas()
-        condition.toPandas()
+        patients.show()
+        encounter.show()
+        condition.show()
     except Exception as e:
         print(e)
-    
-
-    print("\n\n########################################################")
-    print("\nSystem Info\n")
-    print("########################################################\n\n")
-    print(os.system("mvn --version"))
-    print(os.system("java --version"))
-    print("Pyspark version: {}\n\n".format(pyspark.__version__))
-    print("Pathling version: {}\n\n".format(pathling.__version__))
