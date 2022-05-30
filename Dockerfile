@@ -1,7 +1,6 @@
 FROM jupyter/pyspark-notebook:latest
 
-RUN /opt/conda/bin/pip install pathling==5.0.3.dev0 \
-    findspark
+RUN /opt/conda/bin/pip install pathling==5.0.3.dev1
 
 ARG SPARK_SCALA_VERSION=2.12
 
