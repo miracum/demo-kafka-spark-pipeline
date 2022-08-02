@@ -2,9 +2,9 @@ FROM cluster-base
 
 # -- Layer: Apache Spark
 
-# https://archive.apache.org/dist/spark/spark-3.2.1/
-ARG spark_version=3.2.1
-ARG hadoop_version=3.2
+# https://archive.apache.org/dist/spark/spark-3.3.0/
+ARG spark_version=3.3.0
+ARG hadoop_version=3
 #ARG scala_version=2.13
 #ARG spark_filename=spark-${spark_version}-bin-hadoop${hadoop_version}-scala${scala_version}
 ARG spark_filename=spark-${spark_version}-bin-hadoop${hadoop_version}

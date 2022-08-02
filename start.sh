@@ -1,9 +1,11 @@
 #!/bin/bash
+set -e
 
 JUPYTER_ONLY="$1"
 
 printf "Building spark images\n\n"
-cd spark && ./build.sh
+cd spark
+source ./build.sh
 
 printf "Building pathling image\n\n"
 cd ..
