@@ -6,13 +6,15 @@ FROM jupyter/pyspark-notebook:spark-3.3.0
 
 ENV PATHLING_VERSION=5.4.0
 ARG SPARK_SCALA_VERSION=2.12
-RUN /opt/conda/bin/pip install pathling==${PATHLING_VERSION}
 
 USER root
-RUN echo "spark.jars.packages org.apache.spark:spark-sql-kafka-0-10_${SPARK_SCALA_VERSION}:$APACHE_SPARK_VERSION,au.csiro.pathling:library-api:5.4.0" >> /usr/local/spark/conf/spark-defaults.conf
+RUN echo "spark.jars.packages org.apache.spark:spark-sql-kafka-0-10_${SPARK_SCALA_VERSION}:${APACHE_SPARK_VERSION},au.csiro.pathling:library-api:${PATHLING_VERSION}" >> /usr/local/spark/conf/spark-defaults.conf
 
+# https://pathling.csiro.au/docs/encoders#spark-cluster-configuration
 USER ${NB_UID}
-RUN /opt/conda/bin/pip install pathling==5.4.0
+RUN /opt/conda/bin/pip install --quiet --no-cache-dir install pathling==${PATHLING_VERSION} && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}" 
 
 # This caches the download of the dependencies specified earlier.
 RUN source /usr/local/bin/before-notebook.d/spark-config.sh && \
